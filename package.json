@@ -1,0 +1,14 @@
+{
+  "name": "check_apib",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {},
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "drafter.js": "^2.6.5",
+    "js-yaml": "latest",
+    "node-fetch": "^1.6.3",
+    "raml-1-parser": "^1.1.18",
+    "swagger-parser": "^3.4.1"
+  }
+}
