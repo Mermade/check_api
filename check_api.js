@@ -17,6 +17,8 @@ function check_api(api,source) {
 var mode = 'text';
 var format = 'none';
 
+api = api.split('\r').join('');
+
 if (typeof api === 'object') {
 	mode = 'json';
 }
@@ -45,7 +47,7 @@ if (mode == 'text') {
 
 console.log('Mode: '+mode+' format: '+format);
 
-if ((mode == 'text') && (api.startsWith('#') && (format !== 'raml'))) {
+if ((mode == 'text') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (format !== 'raml')) {
 	format = 'api_blueprint';
 }
 else {
