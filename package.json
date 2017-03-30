@@ -5,10 +5,14 @@
   "repository": {},
   "license": "BSD-3-Clause",
   "dependencies": {
+    "ajv": "^4.11.5",
+    "co": "^4.6.0",
     "drafter.js": "^2.6.5",
     "js-yaml": "latest",
     "node-fetch": "^1.6.3",
     "raml-1-parser": "^1.1.18",
-    "swagger-parser": "^3.4.1"
+    "swagger-parser": "^3.4.1",
+    "swagger-schema-official": "1.2.0",
+    "swagger-tools": "^0.10.1"
   }
 }

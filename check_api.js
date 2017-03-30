@@ -3,9 +3,11 @@ var url = require('url');
 var util = require('util');
 
 var fetch = require('node-fetch');
+var co = require('co');
 var yaml = require('js-yaml');
 var drafter = require('drafter.js')
 var bsc = require('swagger-parser');
+var s1p = require('swagger-tools');
 var raml = require('raml-1-parser');
 
 //require("raml-1-parser/plugins/resourceUriValidationPlugin");
@@ -45,19 +47,20 @@ if (mode == 'text') {
 
 ///
 
-console.log('Mode: '+mode+' format: '+format);
 
 if ((mode == 'text') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (format !== 'raml')) {
 	format = 'api_blueprint';
 }
 else {
-	if (api.swagger && api.swagger == '1.2') {
+	if (api.swaggerVersion && api.swaggerVersion == '1.2') {
 		format = 'swagger_1';
 	}
 	if (api.swagger && api.swagger == '2.0') {
 		format = 'swagger_2';
 	}
 }
+
+console.log('Mode: '+mode+' format: '+format);
 
 if (format == 'api_blueprint') {
   var res = drafter.parse(api, {generateSourceMap: true}, function (err, res) {
@@ -80,7 +83,35 @@ else if (format == 'swagger_2') {
   });
 }
 else if (format == 'swagger_1') {
-	console.log('TODO');
+	var base = source.split('/');
+	//base.pop();
+	base = base.join('/');
+	var retrieve = [];
+	var apiDeclarations = [];
+	if (api.apis) {
+		for (var component of api.apis) {
+			console.log(base+component.path);
+			retrieve.push(fetch(base+component.path)
+			.then(res => {
+				return res.text();
+			})
+			.then(data => {
+				//console.log(data);
+				apiDeclarations.push(yaml.safeLoad(data,{json:true}));	
+			}));
+		}
+	}
+
+	co(function* () {
+	  // resolve multiple promises in parallel
+	  var res = yield retrieve;
+	  s1p.specs['v1_2'].validate(api,apiDeclarations,function(err,result){
+	  	console.log(JSON.stringify(result,null,2));
+	  });
+	});  
+
+	// https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
+	
 }
 else if (format == 'raml') {
 	var node = raml.loadApiSync(source);
