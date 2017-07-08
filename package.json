@@ -35,6 +35,7 @@
     "raml-1-parser": "^1.1.18",
     "swagger-parser": "^3.4.1",
     "swagger-schema-official": "1.2.0",
-    "swagger-tools": "^0.10.1"
+    "swagger-tools": "^0.10.1",
+    "swagger2openapi": "^2.5.0"
   }
 }

@@ -5,6 +5,7 @@ var fetch = require('node-fetch');
 var co = require('co');
 var yaml = require('js-yaml');
 var bsc = require('swagger-parser');
+var openapi3 = require('swagger2openapi/validate.js');
 
 //require("raml-1-parser/plugins/resourceUriValidationPlugin");
 //require("raml-1-parser/plugins/crudAnnotationsValidator");
@@ -53,11 +54,23 @@ else {
 	if (api.swagger && api.swagger == '2.0') {
 		format = 'swagger_2';
 	}
+	if (api.openapi && api.openapi.startsWith('3.0')) {
+		format = 'openapi_3';
+	}
 }
 
 console.log('Mode: '+mode+' format: '+format);
 
-if (format == 'api_blueprint') {
+if (format == 'openapi_3') {
+	openapi3.validate(api, {}, function(err,options) {
+		if (err) callback(err, null)
+		else {
+			console.log('Valid openapi 3.0.x');
+			callback(null, options);
+		}
+	});
+}
+else if (format == 'api_blueprint') {
   var drafter = require('drafter.js')
   var res = drafter.parse(api, {generateSourceMap: true}, function (err, res) {
       if (err) {
