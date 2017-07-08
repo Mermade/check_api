@@ -1,9 +1,31 @@
 {
-  "name": "check_apib",
+  "name": "check_api",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": {},
+  "bin": {
+    "check_api": "./check_api.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mike Ralphson",
   "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mermade/check_api.git"
+  },
+  "keywords": [
+    "swagger",
+    "openapi",
+    "raml",
+    "api",
+    "wadl",
+    "api-blueprint",
+    "validation"
+  ],
+  "bugs": {
+    "url": "https://github.com/Mermade/check_api/issues"
+  },
   "dependencies": {
     "ajv": "^4.11.5",
     "co": "^4.6.0",

@@ -62,7 +62,9 @@ if (format == 'api_blueprint') {
   var res = drafter.parse(api, {generateSourceMap: true}, function (err, res) {
       if (err) {
          console.log('Err: '+JSON.stringify(err))
+		 callback(err, null);
       }
+	  else callback(null, api);
       console.log(JSON.stringify(res));
 	  console.log('Ok');
   });
@@ -78,9 +80,7 @@ else if (format == 'swagger_2') {
 		console.log('Valid swagger 2.0');
 		console.log(api.info.title+' '+api.info.version+' host:'+(api.host ? api.host : 'relative'));
 	}
-	if (convert) {
-		callback(err,api||orig);
-	}
+	callback(err,api||orig);
   });
 }
 else if (format == 'swagger_1') {
@@ -142,6 +142,7 @@ else if (format == 'swagger_1') {
 			callback(err,converted);
 		});
 	  }
+	  else callback(null,api);
 	});  
 
 	// https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
@@ -152,6 +153,8 @@ else if (format == 'raml') {
 	var node = raml.loadApiSync(source);
 	var res = node.toJSON({"rootNodeDetails":true});
 	console.log('Errors: '+JSON.stringify(res.errors,null,2));
+	if (res.errors) callback(res.errors,null)
+	else callback(null, source);
 	//console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
 }
 else console.log(mode,' ',format);
