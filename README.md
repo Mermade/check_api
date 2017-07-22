@@ -14,4 +14,5 @@ It returns an exitCode of 0 on success and 1 on failure, making it suitable for 
 
 ## Planned 
 
+* IO Docs
 * WADL
