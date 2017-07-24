@@ -17,6 +17,7 @@
   "keywords": [
     "swagger",
     "openapi",
+    "openapi3",
     "raml",
     "api",
     "wadl",
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "ajv": "^4.11.5",
+    "asyncapi": "^1.0.0-rc2",
     "co": "^4.6.0",
     "drafter.js": "^2.6.5",
     "js-yaml": "latest",

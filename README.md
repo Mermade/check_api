@@ -11,6 +11,7 @@ It returns an exitCode of 0 on success and 1 on failure, making it suitable for 
 * OpenAPI 3.0.x
 * RAML 
 * API Blueprint
+* AsyncAPI 1.0.x
 
 ## Planned 
 

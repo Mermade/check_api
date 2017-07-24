@@ -6,6 +6,12 @@ var co = require('co');
 var yaml = require('js-yaml');
 var bsc = require('swagger-parser');
 var openapi3 = require('swagger2openapi/validate.js');
+var asyncApiSchema = require('asyncapi/schema/asyncapi.json');
+var ajv = require('ajv')({
+    allErrors: true,
+    verbose: true,
+    jsonPointers: true
+});
 
 //require("raml-1-parser/plugins/resourceUriValidationPlugin");
 //require("raml-1-parser/plugins/crudAnnotationsValidator");
@@ -57,20 +63,42 @@ else {
 	if (api.openapi && api.openapi.startsWith('3.0')) {
 		format = 'openapi_3';
 	}
+	if (api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
+		format = 'asyncapi_1';
+	}
 }
 
 console.log('Mode: '+mode+' format: '+format);
 
-if (format == 'openapi_3') {
-	openapi3.validate(api, {}, function(err,options) {
-		if (err) callback(err, null)
-		else {
-			console.log('Valid openapi 3.0.x');
-			callback(null, options);
-		}
-	});
+if (format === 'openapi_3') {
+	try {
+		openapi3.validateSync(api, {}, function(err,options) {
+			if (err) callback(err, null)
+			else {
+				console.log('Valid openapi 3.0.x');
+				callback(null, options);
+			}
+		});
+	}
+	catch (ex) {
+		console.log(ex.message);
+		callback(ex, null)
+	}
 }
-else if (format == 'api_blueprint') {
+else if (format === 'asyncapi_1') {
+	var validate = ajv.compile(asyncApiSchema);
+	validate(api);
+	var errors = validate.errors;
+	if (errors) {
+		console.log(JSON.stringify(errors,null,2));
+		callback(errors, null);
+	}
+	else {
+		console.log('Valid AsyncAPI 1.0.x');
+		callback(null, api);
+	}
+}
+else if (format === 'api_blueprint') {
   var drafter = require('drafter.js')
   var res = drafter.parse(api, {generateSourceMap: true}, function (err, res) {
       if (err) {
@@ -82,7 +110,7 @@ else if (format == 'api_blueprint') {
 	  console.log('Ok');
   });
 }
-else if (format == 'swagger_2') {
+else if (format === 'swagger_2') {
   var orig = api;
   bsc.validate(api,{dereference:{circular:'ignore'}},function(err,api){
     if (err) {
@@ -96,7 +124,7 @@ else if (format == 'swagger_2') {
 	callback(err,api||orig);
   });
 }
-else if (format == 'swagger_1') {
+else if (format === 'swagger_1') {
 	var base = source.split('/');
 	var filename = base.pop();
 	var extension = '';
