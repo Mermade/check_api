@@ -1,6 +1,6 @@
 {
   "name": "check_api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "index.js",
   "description": "API definition validator (OpenApi/Swagger,RAML,API-Blueprint etc)",
   "bin": {

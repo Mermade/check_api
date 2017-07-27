@@ -1,6 +1,3 @@
 node_modules/
 yarn-error.log
-*.json
-*.txt
-*.yaml
-__api__
+test/
