@@ -18,14 +18,15 @@ var ajv = require('ajv')({
 //require("raml-1-parser/plugins/uninheritedTypesDetector");
 //require("raml-1-parser/plugins/xmlAnnotationsValidator");
 
-function check_api(api,source,convert,callback) {
+function check_api(api,options,callback) {
 var mode = 'text';
 var format = 'none';
 
-api = api.split('\r').join('');
-
 if (typeof api === 'object') {
 	mode = 'json';
+}
+else {
+	api = api.split('\r').join('');
 }
 
 if (mode == 'text') {
@@ -125,7 +126,7 @@ else if (format === 'swagger_2') {
   });
 }
 else if (format === 'swagger_1') {
-	var base = source.split('/');
+	var base = options.source.split('/');
 	var filename = base.pop();
 	var extension = '';
 	if (filename.endsWith('.json')) {
@@ -139,7 +140,7 @@ else if (format === 'swagger_1') {
 	}
 	base = base.join('/');
 
-	//if (source.endsWith('.json') || source.endsWith('.yaml')) {
+	//if (options.source.endsWith('.json') || options.source.endsWith('.yaml')) {
 	//	extension = '';
 	//}
 
@@ -154,7 +155,7 @@ else if (format === 'swagger_1') {
 
 			var u = (base+component.path+extension);
 			console.log(u);
-			retrieve.push(fetch(u)
+			retrieve.push(fetch(u,options.fetchOptions)
 			.then(res => {
 				console.log(res.status);
 				return res.text();
@@ -177,7 +178,7 @@ else if (format === 'swagger_1') {
 	  s1p.specs[sVersion].validate(api,apiDeclarations,function(err,result){
 	  	console.log(JSON.stringify(result,null,2));
 	  });
-	  if (convert) {
+	  if (options.convert) {
 	  	s1p.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
 			if (err) console.log(util.inspect(err));
 			callback(err,converted);
@@ -191,11 +192,11 @@ else if (format === 'swagger_1') {
 }
 else if (format == 'raml') {
 	var raml = require('raml-1-parser');
-	var node = raml.loadApiSync(source);
+	var node = raml.loadApiSync(options.source);
 	var res = node.toJSON({"rootNodeDetails":true});
 	console.log('Errors: '+JSON.stringify(res.errors,null,2));
 	if (res.errors) callback(res.errors,null)
-	else callback(null, source);
+	else callback(null, options.source);
 	//console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
 }
 else console.log(mode,' ',format);

@@ -13,7 +13,19 @@ It returns an exitCode of 0 on success and 1 on failure, making it suitable for 
 * API Blueprint
 * AsyncAPI 1.0.x
 
-## Planned 
+## Planned
 
 * IO Docs
 * WADL
+* Google Discovery Format
+
+## API
+
+```javascript
+var check_api = require('check_api');
+var options = {};
+options.source = 'url_or_filename';
+options.convert = false; 
+//options.fetchOptions = {...};
+check_api.check_api(string_or_object,options,callback);
+```

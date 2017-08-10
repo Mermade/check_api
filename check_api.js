@@ -9,32 +9,38 @@ var fetch = require('node-fetch');
 
 var check_api = require('./index.js');
 
-var convert = process.argv.length>3;
+var options = {};
+options.source = process.argv[2];
+options.convert = process.argv.length>3;
+options.fetchOptions = {};
 
 function result(err,converted) {
-	if (convert && converted) {
+	if (options.convert && converted) {
 		fs.writeFileSync(process.argv[3],JSON.stringify(converted,null,2),'utf8');
 	}
 	if (!err) process.exitCode = 0;
 }
 
 process.exitCode = 1;
+if (process.argv.length<3) {
+	console.log('Usage: node check_api {url-or-filename} [{convertflag}]');
+	process.exit();
+}
 var u = url.parse(process.argv[2]);
 if (u.protocol) {
-	var options = {};
 	if (u.protocol.startsWith('https')) {
-		options.agent = new https.Agent({rejectUnauthorized: false});
+		options.fetchOptions.agent = new https.Agent({rejectUnauthorized: false});
 	}
-	fetch(process.argv[2],options)
+	fetch(process.argv[2],options.fetchOptions)
 	.then(res => {
 		return res.text();
 	})
 	.then(data => {
-		check_api.check_api(data,process.argv[2],convert,result);
+		check_api.check_api(data,options,result);
 	});
 }
 else {
 	fs.readFile(process.argv[2],'utf8',function(err,data){
-		check_api.check_api(data,process.argv[2],convert,result);
+		check_api.check_api(data,options,result);
 	});
 }
