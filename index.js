@@ -77,6 +77,7 @@ if (format === 'openapi_3') {
 			if (err) callback(err, null)
 			else {
 				console.log('Valid openapi 3.0.x');
+				console.log(api.info.version,(api.servers ? api.servers[0].url : 'Relative'));
 				callback(null, options);
 			}
 		});
