@@ -150,11 +150,15 @@ else if (format === 'swagger_1') {
 	if (api.apis) {
 		for (var component of api.apis) {
 			component.path = component.path.replace('.{format}','.json');
+            var lbase = base;
 			if ((base.endsWith('/')) && (component.path.startsWith('/'))) {
-				base = base.substr(0,base.length-1);
+				lbase = base.substr(0,base.length-1);
 			}
+            if (component.path.indexOf('://')>=0) {
+                lbase = '';
+            }
 
-			var u = (base+component.path+extension);
+			var u = (lbase+component.path+extension);
 			console.log(u);
 			retrieve.push(fetch(u,options.fetchOptions)
 			.then(res => {
