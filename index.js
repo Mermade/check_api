@@ -115,6 +115,9 @@ else if (format === 'api_blueprint') {
 else if (format === 'swagger_2') {
   var orig = api;
   bsc.validate(api,{dereference:{circular:'ignore'}},function(err,api){
+    if (api && (!api.info || !api.info.title)) {
+        err = {error:'No title'};
+    }
     if (err) {
 		console.log('invalid swagger 2.0');
 		console.log(util.inspect(err));
