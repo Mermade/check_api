@@ -1,0 +1,419 @@
+{
+  "title": "wadl.xsd",
+  "$schema": "http://json-schema.org/schema#",
+  "id": "http://wadl.dev.java.net/2009/02",
+  "type": "object",
+  "properties": {
+    "application": {
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:grammars": {
+          "$ref": "#/definitions/grammars"
+        },
+        "tns:resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/resources"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "application"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "doc": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "xml:lang": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "grammars": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:include": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/include"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:resource": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/resource"
+          }
+        },
+        "base": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "tns:resource"
+      ],
+      "additionalProperties": true
+    },
+    "resource": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:param": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/param"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/resource_type_list"
+        },
+        "queryType": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "tns:method": {
+          "$ref": "#/definitions/method"
+        },
+        "tns:resource": {
+          "$ref": "#/definitions/resource"
+        }
+      },
+      "additionalProperties": true
+    },
+    "resource_type": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:param": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/param"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "tns:method": {
+          "$ref": "#/definitions/method"
+        },
+        "tns:resource": {
+          "$ref": "#/definitions/resource"
+        }
+      },
+      "additionalProperties": true
+    },
+    "method": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:request": {
+          "$ref": "#/definitions/request"
+        },
+        "tns:response": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/response"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/definitions/Method"
+        },
+        "href": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": true
+    },
+    "include": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "href": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": true
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:param": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/param"
+          }
+        },
+        "tns:representation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/representation"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:param": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/param"
+          }
+        },
+        "tns:representation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/representation"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/statusCodeList"
+        }
+      },
+      "additionalProperties": true
+    },
+    "representation": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:param": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/param"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "element": {
+          "type": "string"
+        },
+        "mediaType": {
+          "type": "string"
+        },
+        "href": {
+          "type": "string",
+          "format": "uri"
+        },
+        "profile": {
+          "$ref": "#/definitions/uriList"
+        }
+      },
+      "additionalProperties": true
+    },
+    "param": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "tns:option": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/option"
+          }
+        },
+        "tns:link": {
+          "$ref": "#/definitions/link"
+        },
+        "href": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string"
+        },
+        "style": {
+          "$ref": "#/definitions/ParamStyle"
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "default": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "repeating": {
+          "type": "boolean"
+        },
+        "fixed": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "value": {
+          "type": "string"
+        },
+        "mediaType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "additionalProperties": true
+    },
+    "link": {
+      "type": "object",
+      "properties": {
+        "tns:doc": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/doc"
+          }
+        },
+        "resource_type": {
+          "type": "string",
+          "format": "uri"
+        },
+        "rel": {
+          "type": "string"
+        },
+        "rev": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "resource_type_list": {
+      "type": "string"
+    },
+    "Method": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/HTTPMethods"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "additionalProperties": false
+    },
+    "HTTPMethods": {
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "HEAD",
+        "DELETE"
+      ]
+    },
+    "uriList": {
+      "type": "string"
+    },
+    "statusCodeList": {
+      "type": "string"
+    },
+    "ParamStyle": {
+      "enum": [
+        "plain",
+        "query",
+        "matrix",
+        "header",
+        "template"
+      ]
+    }
+  }
+}
