@@ -35,7 +35,7 @@ try {
 	mode = 'json';
 }
 catch (ex) {
-	//console.log(ex.message);
+	console.error(ex.message);
 }
 }
 if (mode == 'text') {
@@ -45,7 +45,7 @@ if (mode == 'text') {
 		mode = 'yaml';
 	}
 	catch (ex) {
-		//console.log(ex.message);
+		console.error(ex.message);
 	}
 }
 
@@ -125,6 +125,9 @@ else if (format === 'swagger_2') {
 	else {
 		console.log('Valid swagger 2.0');
 		console.log(api.info.title+' '+api.info.version+' host:'+(api.host ? api.host : 'relative'));
+        if (api.info["x-logo"] && api.info["x-logo"].url) {
+            console.log('Has logo: '+api.info["x-logo"].url);
+        }
 	}
 	callback(err,api||orig);
   });
