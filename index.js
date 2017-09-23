@@ -23,93 +23,96 @@ var mode = 'text';
 var format = 'none';
 
 if (typeof api === 'object') {
-	mode = 'json';
+    mode = 'json';
 }
 else {
-	api = api.split('\r').join('');
+    api = api.split('\r').join('');
 }
 
 if (mode == 'text') {
 try {
-	api = JSON.parse(api);
-	mode = 'json';
+    api = JSON.parse(api);
+    mode = 'json';
 }
 catch (ex) {
-	console.error(ex.message);
+    console.error(ex.message);
 }
 }
 if (mode == 'text') {
-	try {
-	    if (api.startsWith('#%RAML')) format = 'raml';
-		api = yaml.safeLoad(api);
-		mode = 'yaml';
-	}
-	catch (ex) {
-		console.error(ex.message);
-	}
+    try {
+        if (api.startsWith('#%RAML')) format = 'raml';
+        api = yaml.safeLoad(api);
+        mode = 'yaml';
+    }
+    catch (ex) {
+        console.error(ex.message);
+    }
 }
 
 ///
 
 if ((mode == 'text') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (format !== 'raml')) {
-	format = 'api_blueprint';
+    format = 'api_blueprint';
 }
 else {
-	if (api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
-		format = 'swagger_1';
-	}
-	if (api.swagger && api.swagger == '2.0') {
-		format = 'swagger_2';
-	}
-	if (api.openapi && api.openapi.startsWith('3.0')) {
-		format = 'openapi_3';
-	}
-	if (api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
-		format = 'asyncapi_1';
-	}
+    if (api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
+        format = 'swagger_1';
+    }
+    if (api.swagger && api.swagger == '2.0') {
+        format = 'swagger_2';
+    }
+    if (api.openapi && api.openapi.startsWith('3.0')) {
+        format = 'openapi_3';
+    }
+    if (api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
+        format = 'asyncapi_1';
+    }
 }
 
 console.log('Mode: '+mode+' format: '+format);
 
 if (format === 'openapi_3') {
-	try {
-		openapi3.validateSync(api, {}, function(err,options) {
-			if (err) callback(err, null)
-			else {
-				console.log('Valid openapi 3.0.x');
-				console.log(api.info.version,(api.servers ? api.servers[0].url : 'Relative'));
-				callback(null, options);
-			}
-		});
-	}
-	catch (ex) {
-		console.log(ex.message);
-		callback(ex, null)
-	}
+    var options = {};
+    try {
+        openapi3.validateSync(api, options, function(err,options) {
+            if (err) callback(err, null)
+            else {
+                console.log('Valid openapi 3.0.x');
+                console.log(api.info.version,(api.servers ? api.servers[0].url : 'Relative'));
+                callback(null, options);
+            }
+        });
+    }
+    catch (ex) {
+        console.log(ex.message);
+	var context = options.context.pop();
+	console.log(context);
+        callback(ex, null)
+    }
 }
 else if (format === 'asyncapi_1') {
-	var validate = ajv.compile(asyncApiSchema);
-	validate(api);
-	var errors = validate.errors;
-	if (errors) {
-		console.log(JSON.stringify(errors,null,2));
-		callback(errors, null);
-	}
-	else {
-		console.log('Valid AsyncAPI 1.0.x');
-		callback(null, api);
-	}
+    var validate = ajv.compile(asyncApiSchema);
+    validate(api);
+    var errors = validate.errors;
+    if (errors) {
+        console.log(JSON.stringify(errors,null,2));
+        callback(errors, null);
+    }
+    else {
+        console.log('Valid AsyncAPI 1.0.x');
+        callback(null, api);
+    }
 }
 else if (format === 'api_blueprint') {
   var drafter = require('drafter.js')
   var res = drafter.parse(api, {generateSourceMap: true}, function (err, res) {
       if (err) {
          console.log('Err: '+JSON.stringify(err))
-		 callback(err, null);
+         callback(err, null);
       }
-	  else callback(null, api);
+      else callback(null, api);
       console.log(JSON.stringify(res));
-	  console.log('Ok');
+      console.log('Ok');
   });
 }
 else if (format === 'swagger_2') {
@@ -119,101 +122,101 @@ else if (format === 'swagger_2') {
         err = {error:'No title'};
     }
     if (err) {
-		console.log('invalid swagger 2.0');
-		console.log(util.inspect(err));
-	}
-	else {
-		console.log('Valid swagger 2.0');
-		console.log(api.info.title+' '+api.info.version+' host:'+(api.host ? api.host : 'relative'));
+        console.log('invalid swagger 2.0');
+        console.log(util.inspect(err));
+    }
+    else {
+        console.log('Valid swagger 2.0');
+        console.log(api.info.title+' '+api.info.version+' host:'+(api.host ? api.host : 'relative'));
         if (api.info["x-logo"] && api.info["x-logo"].url) {
             console.log('Has logo: '+api.info["x-logo"].url);
         }
-	}
-	callback(err,api||orig);
+    }
+    callback(err,api||orig);
   });
 }
 else if (format === 'swagger_1') {
-	var base = options.source.split('/');
-	var filename = base.pop();
-	var extension = '';
-	if (filename.endsWith('.json')) {
-		extension = '.json';
-	}
-	else if (filename.endsWith('yaml')) {
-		extension = '.yaml';
-	}
-	else {
-		base.push(filename);
-	}
-	base = base.join('/');
+    var base = options.source.split('/');
+    var filename = base.pop();
+    var extension = '';
+    if (filename.endsWith('.json')) {
+        extension = '.json';
+    }
+    else if (filename.endsWith('yaml')) {
+        extension = '.yaml';
+    }
+    else {
+        base.push(filename);
+    }
+    base = base.join('/');
 
-	//if (options.source.endsWith('.json') || options.source.endsWith('.yaml')) {
-	//	extension = '';
-	//}
+    //if (options.source.endsWith('.json') || options.source.endsWith('.yaml')) {
+    //    extension = '';
+    //}
 
-	var retrieve = [];
-	var apiDeclarations = [];
-	if (api.apis) {
-		for (var component of api.apis) {
-			component.path = component.path.replace('.{format}','.json');
+    var retrieve = [];
+    var apiDeclarations = [];
+    if (api.apis) {
+        for (var component of api.apis) {
+            component.path = component.path.replace('.{format}','.json');
             var lbase = base;
-			if ((base.endsWith('/')) && (component.path.startsWith('/'))) {
-				lbase = base.substr(0,base.length-1);
-			}
+            if ((base.endsWith('/')) && (component.path.startsWith('/'))) {
+                lbase = base.substr(0,base.length-1);
+            }
             if (component.path.indexOf('://')>=0) {
                 lbase = '';
             }
 
-			var u = (lbase+component.path+extension);
-			console.log(u);
-			retrieve.push(fetch(u,options.fetchOptions)
-			.then(res => {
-				console.log(res.status);
-				return res.text();
-			})
-			.then(data => {
-				//console.log(data);
-				apiDeclarations.push(yaml.safeLoad(data,{json:true}));	
-			})
-			.catch(err => {
-				console.log(util.inspect(err));
-			}));
-		}
-	}
+            var u = (lbase+component.path+extension);
+            console.log(u);
+            retrieve.push(fetch(u,options.fetchOptions)
+            .then(res => {
+                console.log(res.status);
+                return res.text();
+            })
+            .then(data => {
+                //console.log(data);
+                apiDeclarations.push(yaml.safeLoad(data,{json:true}));    
+            })
+            .catch(err => {
+                console.log(util.inspect(err));
+            }));
+        }
+    }
 
-	var s1p = require('swagger-tools');
-	co(function* () {
-	  // resolve multiple promises in parallel
-	  var res = yield retrieve;
-	  var sVersion = 'v1_2';
-	  s1p.specs[sVersion].validate(api,apiDeclarations,function(err,result){
-	  	console.log(JSON.stringify(result,null,2));
-	  });
-	  if (options.convert) {
-	  	s1p.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
-			if (err) console.log(util.inspect(err));
-			callback(err,converted);
-		});
-	  }
-	  else callback(null,api);
-	});  
+    var s1p = require('swagger-tools');
+    co(function* () {
+      // resolve multiple promises in parallel
+      var res = yield retrieve;
+      var sVersion = 'v1_2';
+      s1p.specs[sVersion].validate(api,apiDeclarations,function(err,result){
+          console.log(JSON.stringify(result,null,2));
+      });
+      if (options.convert) {
+          s1p.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
+            if (err) console.log(util.inspect(err));
+            callback(err,converted);
+        });
+      }
+      else callback(null,api);
+    });  
 
-	// https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
-	
+    // https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
+    
 }
 else if (format == 'raml') {
-	var raml = require('raml-1-parser');
-	var node = raml.loadApiSync(options.source);
-	var res = node.toJSON({"rootNodeDetails":true});
-	console.log('Errors: '+JSON.stringify(res.errors,null,2));
-	if (res.errors) callback(res.errors,null)
-	else callback(null, options.source);
-	//console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
+    var raml = require('raml-1-parser');
+    var node = raml.loadApiSync(options.source);
+    var res = node.toJSON({"rootNodeDetails":true});
+    console.log('Errors: '+JSON.stringify(res.errors,null,2));
+    if (res.errors) callback(res.errors,null)
+    else callback(null, options.source);
+    //console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
 }
 else console.log(mode,' ',format);
 
 }
 
 module.exports = {
-	check_api : check_api
+    check_api : check_api
 };
