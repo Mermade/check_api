@@ -23,7 +23,7 @@ function result(err,converted) {
 
 process.exitCode = 1;
 if (process.argv.length<3) {
-    console.log('Usage: node check_api {url-or-filename} [{convertflag}]');
+    console.log('Usage: node check_api {url-or-filename} [{convert-filename}]');
     process.exit();
 }
 var u = url.parse(process.argv[2]);

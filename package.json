@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "ajv": "^4.11.5",
+    "apib2swagger": "^0.9.0",
     "asyncapi": "^1.0.0-rc2",
     "co": "^4.6.0",
     "drafter.js": "^2.6.5",

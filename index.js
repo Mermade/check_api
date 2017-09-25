@@ -58,6 +58,7 @@ else {
     if (api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
         format = 'swagger_1';
     }
+    console.log(typeof api.swagger);
     if (api.swagger && api.swagger == '2.0') {
         format = 'swagger_2';
     }
@@ -110,8 +111,18 @@ else if (format === 'api_blueprint') {
          console.log('Err: '+JSON.stringify(err))
          callback(err, null);
       }
-      else callback(null, api);
-      console.log(JSON.stringify(res));
+      else {
+          if (options.convert) {
+	      var apib2swagger = require('apib2swagger');
+	      apib2swagger.convert(api, function (err, res) {
+	          callback(err,res.swagger);
+	      });
+          }
+	  else {
+      	      callback(null, api);
+	  }
+      }
+      console.log(util.inspect(res));
       console.log('Ok');
   });
 }
