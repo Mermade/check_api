@@ -25,7 +25,7 @@ var format = 'none';
 if (typeof api === 'object') {
     mode = 'json';
 }
-else {
+else if (typeof api === 'string') {
     api = api.split('\r').join('');
 }
 
@@ -40,7 +40,7 @@ catch (ex) {
 }
 if (mode == 'text') {
     try {
-        if (api.startsWith('#%RAML')) format = 'raml';
+        if (api && api.startsWith('#%RAML')) format = 'raml';
         api = yaml.safeLoad(api);
         mode = 'yaml';
     }
@@ -51,21 +51,20 @@ if (mode == 'text') {
 
 ///
 
-if ((mode == 'text') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (format !== 'raml')) {
+if ((mode == 'text') && (typeof api === 'string') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (format !== 'raml')) {
     format = 'api_blueprint';
 }
 else {
-    if (api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
+    if (api && api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
         format = 'swagger_1';
     }
-    console.log(typeof api.swagger);
-    if (api.swagger && api.swagger == '2.0') {
+    if (api && api.swagger && api.swagger === '2.0') {
         format = 'swagger_2';
     }
-    if (api.openapi && api.openapi.startsWith('3.0')) {
+    if (api && api.openapi && api.openapi.startsWith('3.0')) {
         format = 'openapi_3';
     }
-    if (api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
+    if (api && api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
         format = 'asyncapi_1';
     }
 }
@@ -224,7 +223,6 @@ else if (format == 'raml') {
     else callback(null, options.source);
     //console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
 }
-else console.log(mode,' ',format);
 
 }
 
