@@ -19,30 +19,30 @@ var ajv = require('ajv')({
 //require("raml-1-parser/plugins/xmlAnnotationsValidator");
 
 function check_api(api,options,callback) {
-var mode = 'text';
-var format = 'none';
+options.mode = 'text';
+options.format = 'none';
 
 if (typeof api === 'object') {
-    mode = 'json';
+    options.mode = 'json';
 }
 else if (typeof api === 'string') {
     api = api.split('\r').join('');
 }
 
-if (mode == 'text') {
-try {
-    api = JSON.parse(api);
-    mode = 'json';
-}
-catch (ex) {
-    console.error(ex.message);
-}
-}
-if (mode == 'text') {
+if (options.mode == 'text') {
     try {
-        if (api && api.startsWith('#%RAML')) format = 'raml';
+        api = JSON.parse(api);
+        options.mode = 'json';
+    }
+    catch (ex) {
+        console.error(ex.message);
+    }
+}
+if (options.mode == 'text') {
+    try {
+        if (api && api.startsWith('#%RAML')) options.format = 'raml';
         api = yaml.safeLoad(api);
-        mode = 'yaml';
+        options.mode = 'yaml';
     }
     catch (ex) {
         console.error(ex.message);
@@ -51,101 +51,98 @@ if (mode == 'text') {
 
 ///
 
-if ((mode == 'text') && (typeof api === 'string') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (format !== 'raml')) {
-    format = 'api_blueprint';
+if ((options.mode == 'text') && (typeof api === 'string') && (api.startsWith('#') || (api.startsWith('FORMAT: '))) && (options.format !== 'raml')) {
+    options.format = 'api_blueprint';
 }
 else {
     if (api && api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
-        format = 'swagger_1';
+        options.format = 'swagger_1';
     }
     if (api && api.swagger && api.swagger === '2.0') {
-        format = 'swagger_2';
+        options.format = 'swagger_2';
     }
     if (api && api.openapi && api.openapi.startsWith('3.0')) {
-        format = 'openapi_3';
+        options.format = 'openapi_3';
     }
     if (api && api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
-        format = 'asyncapi_1';
+        options.format = 'asyncapi_1';
     }
 }
 
-console.log('Mode: '+mode+' format: '+format);
-
-if (format === 'openapi_3') {
-    var options = {};
+if (options.format === 'openapi_3') {
+    var options = {laxRefs:true};
     try {
         openapi3.validateSync(api, options, function(err,options) {
-            if (err) callback(err, null)
+            if (err) callback(err, options)
             else {
-                console.log('Valid openapi 3.0.x');
-                console.log(api.info.version,(api.servers ? api.servers[0].url : 'Relative'));
+	    	options.message = 'Valid openapi 3.0.x';
+		options.context = api.info.version + ' ' + 
+		    (api.servers ? api.servers[0].url : 'Relative');
                 callback(null, options);
             }
         });
     }
     catch (ex) {
-        console.log(ex.message);
 	var context = options.context.pop();
-	console.log(context);
-        callback(ex, null)
+	options.context = context;
+        callback(ex, options);
     }
 }
-else if (format === 'asyncapi_1') {
+else if (options.format === 'asyncapi_1') {
     var validate = ajv.compile(asyncApiSchema);
     validate(api);
     var errors = validate.errors;
     if (errors) {
-        console.log(JSON.stringify(errors,null,2));
-        callback(errors, null);
+        callback(errors, options);
     }
     else {
-        console.log('Valid AsyncAPI 1.0.x');
-        callback(null, api);
+        options.message = 'Valid AsyncAPI 1.0.x';
+        callback(null, options);
     }
 }
-else if (format === 'api_blueprint') {
+else if (options.format === 'api_blueprint') {
   var drafter = require('drafter.js')
   var res = drafter.parse(api, {generateSourceMap: true}, function (err, res) {
       if (err) {
-         console.log('Err: '+JSON.stringify(err))
-         callback(err, null);
+         callback(err, options);
       }
       else {
           if (options.convert) {
 	      var apib2swagger = require('apib2swagger');
 	      apib2swagger.convert(api, function (err, res) {
-	          callback(err,res.swagger);
+	          options.converted = res.swagger; 
+	          callback(err, options);
 	      });
           }
 	  else {
-      	      callback(null, api);
+	      options.message = 'Valid API Blueprint';
+      	      callback(null, options);
 	  }
       }
-      console.log(util.inspect(res));
-      console.log('Ok');
   });
 }
-else if (format === 'swagger_2') {
+else if (options.format === 'swagger_2') {
   var orig = api;
   bsc.validate(api,{dereference:{circular:'ignore'}},function(err,api){
     if (api && (!api.info || !api.info.title)) {
         err = {error:'No title'};
     }
     if (err) {
-        console.log('invalid swagger 2.0');
-        console.log(util.inspect(err));
+    	options.message = 'Invalid swagger 2.0';
     }
     else {
-        console.log('Valid swagger 2.0');
-        console.log(api.info.title+' '+api.info.version+' host:'+(api.host ? api.host : 'relative'));
+        options.message = 'Valid swagger 2.0';
+	options.context = api.info.title+' '+api.info.version+
+	    ' host:'+(api.host ? api.host : 'relative');
         if (api.info["x-logo"] && api.info["x-logo"].url) {
-            console.log('Has logo: '+api.info["x-logo"].url);
+            options.context += '\nHas logo: '+api.info["x-logo"].url;
         }
     }
-    callback(err,api||orig);
+    options.api = api||orig;
+    callback(err, options);
   });
 }
-else if (format === 'swagger_1') {
+else if (options.format === 'swagger_1') {
     var base = options.source.split('/');
     var filename = base.pop();
     var extension = '';
@@ -189,7 +186,7 @@ else if (format === 'swagger_1') {
                 apiDeclarations.push(yaml.safeLoad(data,{json:true}));    
             })
             .catch(err => {
-                console.log(util.inspect(err));
+                console.error(util.inspect(err));
             }));
         }
     }
@@ -204,24 +201,31 @@ else if (format === 'swagger_1') {
       });
       if (options.convert) {
           s1p.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
-            if (err) console.log(util.inspect(err));
-            callback(err,converted);
+	    options.converted = converted;
+            callback(err, options);
         });
       }
-      else callback(null,api);
+      else {
+      	options.api = api;
+      	callback(null, options);
+      }
     });  
 
     // https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
     
 }
-else if (format == 'raml') {
+else if (options.format == 'raml') {
     var raml = require('raml-1-parser');
     var node = raml.loadApiSync(options.source);
     var res = node.toJSON({"rootNodeDetails":true});
-    console.log('Errors: '+JSON.stringify(res.errors,null,2));
-    if (res.errors) callback(res.errors,null)
-    else callback(null, options.source);
+    if (res.errors) callback(res.errors,options)
+    else callback(null, options);
     //console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
+}
+else {
+    var err = {};
+    err.message = 'No format/type detected';
+    callback(err,options);
 }
 
 }

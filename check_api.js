@@ -9,16 +9,29 @@ var fetch = require('node-fetch');
 
 var check_api = require('./index.js');
 
+var red = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[31m';
+var green = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[32m';
+var normal = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[0m';
+
 var options = {};
 options.source = process.argv[2];
 options.convert = process.argv.length>3;
 options.fetchOptions = {};
 
-function result(err,converted) {
-    if (options.convert && converted) {
-        fs.writeFileSync(process.argv[3],JSON.stringify(converted,null,2),'utf8');
+function result(err,options) {
+    if (options.convert && options.converted) {
+        fs.writeFileSync(process.argv[3],JSON.stringify(options.converted,null,2),'utf8');
     }
+    if (options && options.format && options.mode) {
+    	console.log(normal+'Mode: %s, format: %s',options.mode,options.format);
+    }
+    if (err) console.error(red+util.inspect(err));
+    else process.stdout.write(green);
+    if (options && options.output) console.log(util.inspect(options.output));
+    if (options && options.message) console.log(options.message);
+    if (options && options.context) console.log(util.inspect(options.context));
     if (!err) process.exitCode = 0;
+    console.log('Exiting with result code: %s',process.exitCode);
 }
 
 process.exitCode = 1;
