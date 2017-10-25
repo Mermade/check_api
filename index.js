@@ -70,9 +70,10 @@ else {
 }
 
 if (options.format === 'openapi_3') {
-    var options = {laxRefs:true};
+    var options = {laxRefs:true,resolve:true,source:options.source,convert:options.convert};
     try {
-        openapi3.validateSync(api, options, function(err,options) {
+        openapi3.validate(api, options, function(err,options) {
+            options.converted = options.openapi||api;
             if (err) callback(err, options)
             else {
 	    	options.message = 'Valid openapi 3.0.x';

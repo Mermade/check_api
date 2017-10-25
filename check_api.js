@@ -25,11 +25,19 @@ function result(err,options) {
     if (options && options.format && options.mode) {
     	console.log(normal+'Mode: %s, format: %s',options.mode,options.format);
     }
-    if (err) console.error(red+util.inspect(err));
+    if (err) {
+        console.error(red+err.message);
+        if (err.stack && err.name !== 'AssertionError') {
+            console.log(err.stack);
+        }
+    }
     else process.stdout.write(green);
     if (options && options.output) console.log(util.inspect(options.output));
     if (options && options.message) console.log(options.message);
-    if (options && options.context) console.log(util.inspect(options.context));
+    if (options && options.context) {
+        let context = options.context.pop();
+        console.log(context);
+    }
     if (!err) process.exitCode = 0;
     console.log('Exiting with result code: %s',process.exitCode);
 }
