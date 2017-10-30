@@ -77,15 +77,15 @@ if (options.format === 'openapi_3') {
             if (err) callback(err, options)
             else {
 	    	options.message = 'Valid openapi 3.0.x';
-		options.context = api.info.version + ' ' + 
-		    (api.servers ? api.servers[0].url : 'Relative');
+		options.context = [api.info.version + ' ' +
+		    (api.servers ? api.servers[0].url : 'Relative')];
                 callback(null, options);
             }
         });
     }
     catch (ex) {
 	var context = options.context.pop();
-	options.context = context;
+	options.context = [context];
         callback(ex, options);
     }
 }
@@ -111,7 +111,7 @@ else if (options.format === 'api_blueprint') {
           if (options.convert) {
 	      var apib2swagger = require('apib2swagger');
 	      apib2swagger.convert(api, function (err, res) {
-	          options.converted = res.swagger; 
+	          options.converted = res.swagger;
 	          callback(err, options);
 	      });
           }
@@ -133,8 +133,8 @@ else if (options.format === 'swagger_2') {
     }
     else {
         options.message = 'Valid swagger 2.0';
-	options.context = api.info.title+' '+api.info.version+
-	    ' host:'+(api.host ? api.host : 'relative');
+	options.context = [api.info.title+' '+api.info.version+
+	    ' host:'+(api.host ? api.host : 'relative')];
         if (api.info["x-logo"] && api.info["x-logo"].url) {
             options.context += '\nHas logo: '+api.info["x-logo"].url;
         }
@@ -184,7 +184,7 @@ else if (options.format === 'swagger_1') {
             })
             .then(data => {
                 //console.log(data);
-                apiDeclarations.push(yaml.safeLoad(data,{json:true}));    
+                apiDeclarations.push(yaml.safeLoad(data,{json:true}));
             })
             .catch(err => {
                 console.error(util.inspect(err));
@@ -210,10 +210,10 @@ else if (options.format === 'swagger_1') {
       	options.api = api;
       	callback(null, options);
       }
-    });  
+    });
 
     // https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
-    
+
 }
 else if (options.format == 'raml') {
     var raml = require('raml-1-parser');
