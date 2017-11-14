@@ -78,7 +78,7 @@ if (options.format === 'openapi_3') {
             else {
 	    	options.message = 'Valid openapi 3.0.x';
 		options.context = [api.info.version + ' ' +
-		    (api.servers ? api.servers[0].url : 'Relative')];
+		    (api.servers && api.servers.length ? api.servers[0].url : 'Relative')];
                 callback(null, options);
             }
         });
@@ -219,8 +219,12 @@ else if (options.format == 'raml') {
     var raml = require('raml-1-parser');
     var node = raml.loadApiSync(options.source);
     var res = node.toJSON({"rootNodeDetails":true});
-    if (res.errors) callback(res.errors,options)
-    else callback(null, options);
+    if (res.errors && res.errors.length) callback(res.errors,options)
+    else {
+        options.api = res;
+        options.message = api.title + ' ' +api.version;
+        callback(null, options);
+    }
     //console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
 }
 else {

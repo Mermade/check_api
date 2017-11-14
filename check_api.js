@@ -26,9 +26,14 @@ function result(err,options) {
     	console.log(normal+'Mode: %s, format: %s',options.mode,options.format);
     }
     if (err) {
-        console.error(red+err.message);
-        if (err.stack && err.name !== 'AssertionError') {
-            console.log(err.stack);
+        if (err.message) {
+            console.error(red+err.message);
+            if (err.stack && err.name !== 'AssertionError') {
+                console.log(err.stack);
+            }
+        }
+        else {
+            console.error(red+util.inspect(err,{depth:4}));
         }
     }
     else process.stdout.write(green);
