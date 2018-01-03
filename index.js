@@ -136,7 +136,7 @@ else if (options.format === 'swagger_2') {
 	options.context = [api.info.title+' '+api.info.version+
 	    ' host:'+(api.host ? api.host : 'relative')];
         if (api.info["x-logo"] && api.info["x-logo"].url) {
-            options.context += '\nHas logo: '+api.info["x-logo"].url;
+            options.context[0] += '\nHas logo: '+api.info["x-logo"].url;
         }
     }
     options.api = api||orig;
@@ -174,6 +174,9 @@ else if (options.format === 'swagger_1') {
             if (component.path.indexOf('://')>=0) {
                 lbase = '';
             }
+	    if (component.path.indexOf('.json')>=0) {
+		extension = '';
+	    }
 
             var u = (lbase+component.path+extension);
             console.log(u);
