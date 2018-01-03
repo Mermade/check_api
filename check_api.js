@@ -53,7 +53,7 @@ if (process.argv.length<3) {
     process.exit();
 }
 var u = url.parse(process.argv[2]);
-if (u.protocol) {
+if (u.protocol && u.protocol.startsWith('http')) {
     if (u.protocol.startsWith('https')) {
         options.fetchOptions.agent = new https.Agent({rejectUnauthorized: false});
     }
