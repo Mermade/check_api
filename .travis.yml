@@ -1,0 +1,4 @@
+env:
+  - src: 'https://raw.githubusercontent.com/Mermade/swagger2openapi/master/test/petstore/openapi.yaml'
+script:
+  - node check_api $src
