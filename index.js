@@ -58,14 +58,23 @@ else {
     if (api && api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
         options.format = 'swagger_1';
     }
-    if (api && api.swagger && api.swagger === '2.0') {
+    else if (api && api.swagger && api.swagger === '2.0') {
         options.format = 'swagger_2';
     }
-    if (api && api.openapi && api.openapi.startsWith('3.0')) {
+    else if (api && api.swagger) {
+	console.warn('Unknown swagger version: '+api.swagger);
+    }
+    else if (api && api.openapi && (typeof api.openapi === 'string') && api.openapi.startsWith('3.0')) {
         options.format = 'openapi_3';
     }
-    if (api && api.asyncapi &&  api.asyncapi.startsWith('1.0')) {
+    else if (api && api.openapi) {
+	console.warn('Unknown openapi version: '+api.openapi);
+    }
+    else if (api && api.asyncapi && (typeof api.asyncapi === 'string') && api.asyncapi.startsWith('1.0')) {
         options.format = 'asyncapi_1';
+    }
+    else if (api && api.asyncapi) {
+	console.warn('Unknown asyncapi version: '+api.asyncapi);
     }
 }
 
