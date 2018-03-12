@@ -3,8 +3,10 @@ node_js:
   - "8"
 env:
   - src: 'https://raw.githubusercontent.com/Mermade/swagger2openapi/master/test/petstore/openapi.yaml'
-    webhook: 'https://localhost:80'
+    webhook: '' #https://localhost:80
 script:
   - node check_api $src | tee check_api.out
-after_script:
-  - curl -F output=@check_api.out $webhook
+after_success:
+  - [[ -n $webhook ]] && curl -F status=0 -F output=@check_api.out $webhook
+after_failure:
+  - [[ -n $webhook ]] && curl -F status=1 -F output=@check_api.out $webhook
