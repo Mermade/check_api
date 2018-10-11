@@ -36,10 +36,10 @@
     "drafter.js": "^2.6.5",
     "js-yaml": "latest",
     "node-fetch": "^1.7.3",
+    "oas-validator": "^1.1.9",
     "raml-1-parser": "^1.1.44",
     "swagger-parser": "^3.4.2",
     "swagger-schema-official": "1.2.0",
-    "swagger-tools": "^0.10.3",
-    "swagger2openapi": "^2.11.14"
+    "swagger-tools": "^0.10.3"
   }
 }

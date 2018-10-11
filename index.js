@@ -5,7 +5,7 @@ var fetch = require('node-fetch');
 var co = require('co');
 var yaml = require('js-yaml');
 var bsc = require('swagger-parser');
-var openapi3 = require('swagger2openapi/validate.js');
+var openapi3 = require('oas-validator');
 var asyncApiSchema = require('asyncapi/schema/asyncapi.json');
 var ajv = require('ajv')({
     allErrors: true,
@@ -133,7 +133,7 @@ else if (options.format === 'api_blueprint') {
 }
 else if (options.format === 'swagger_2') {
   var orig = api;
-  bsc.validate(api,{dereference:{circular:'ignore'}},function(err,api){
+  bsc.validate(options.source,{resolve:{external:true},dereference:{circular:'ignore'}},function(err,api){
     if (api && (!api.info || !api.info.title)) {
         err = {error:'No title'};
     }
