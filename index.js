@@ -1,13 +1,17 @@
-var url = require('url');
-var util = require('util');
+'use strict';
 
-var fetch = require('node-fetch');
-var co = require('co');
-var yaml = require('js-yaml');
-var bsc = require('swagger-parser');
-var openapi3 = require('oas-validator');
-var asyncApiSchema = require('asyncapi/schema/asyncapi.json');
-var ajv = require('ajv')({
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+const util = require('util');
+
+const fetch = require('node-fetch');
+const co = require('co');
+const yaml = require('js-yaml');
+const bsc = require('swagger-parser');
+const openapi3 = require('oas-validator');
+const asyncApiSchema = require('asyncapi/schema/asyncapi.json');
+const ajv = require('ajv')({
     allErrors: true,
     verbose: true,
     jsonPointers: true
@@ -58,23 +62,27 @@ else {
     if (api && api.swaggerVersion && (typeof api.swaggerVersion === 'string') && api.swaggerVersion.startsWith('1.')) {
         options.format = 'swagger_1';
     }
+    else if (api && api.swagrVersion) {
+        options.format = 'swagger_1';
+        options.patchSwagr = true;
+    }
     else if (api && api.swagger && api.swagger === '2.0') {
         options.format = 'swagger_2';
     }
     else if (api && api.swagger) {
-	console.warn('Unknown swagger version: '+api.swagger);
+    console.warn('Unknown swagger version: '+api.swagger);
     }
     else if (api && api.openapi && (typeof api.openapi === 'string') && api.openapi.startsWith('3.0')) {
         options.format = 'openapi_3';
     }
     else if (api && api.openapi) {
-	console.warn('Unknown openapi version: '+api.openapi);
+    console.warn('Unknown openapi version: '+api.openapi);
     }
     else if (api && api.asyncapi && (typeof api.asyncapi === 'string') && api.asyncapi.startsWith('1.0')) {
         options.format = 'asyncapi_1';
     }
     else if (api && api.asyncapi) {
-	console.warn('Unknown asyncapi version: '+api.asyncapi);
+    console.warn('Unknown asyncapi version: '+api.asyncapi);
     }
 }
 
@@ -85,16 +93,16 @@ if (options.format === 'openapi_3') {
             options.converted = options.openapi||api;
             if (err) callback(err, options)
             else {
-	    	options.message = 'Valid openapi 3.0.x';
-		options.context = [api.info.version + ' ' +
-		    (api.servers && api.servers.length ? api.servers[0].url : 'Relative')];
+            options.message = 'Valid openapi 3.0.x';
+        options.context = [api.info.version + ' ' +
+            (api.servers && api.servers.length ? api.servers[0].url : 'Relative')];
                 callback(null, options);
             }
         });
     }
     catch (ex) {
-	var context = options.context.pop();
-	options.context = [context];
+    var context = options.context.pop();
+    options.context = [context];
         callback(ex, options);
     }
 }
@@ -118,16 +126,16 @@ else if (options.format === 'api_blueprint') {
       }
       else {
           if (options.convert) {
-	      var apib2swagger = require('apib2swagger');
-	      apib2swagger.convert(api, function (err, res) {
-	          options.converted = res.swagger;
-	          callback(err, options);
-	      });
+          var apib2swagger = require('apib2swagger');
+          apib2swagger.convert(api, function (err, res) {
+              options.converted = res.swagger;
+              callback(err, options);
+          });
           }
-	  else {
-	      options.message = 'Valid API Blueprint';
-      	      callback(null, options);
-	  }
+      else {
+          options.message = 'Valid API Blueprint';
+                callback(null, options);
+      }
       }
   });
 }
@@ -138,12 +146,12 @@ else if (options.format === 'swagger_2') {
         err = {error:'No title'};
     }
     if (err) {
-    	options.message = 'Invalid swagger 2.0';
+        options.message = 'Invalid swagger 2.0';
     }
     else {
         options.message = 'Valid swagger 2.0';
-	options.context = [api.info.title+' '+api.info.version+
-	    ' host:'+(api.host ? api.host : 'relative')];
+    options.context = [api.info.title+' '+api.info.version+
+        ' host:'+(api.host ? api.host : 'relative')];
         if (api.info["x-logo"] && api.info["x-logo"].url) {
             options.context[0] += '\nHas logo: '+api.info["x-logo"].url;
         }
@@ -174,7 +182,7 @@ else if (options.format === 'swagger_1') {
     var retrieve = [];
     var apiDeclarations = [];
     if (api.apis) {
-        for (var component of api.apis) {
+        for (let component of api.apis) {
             component.path = component.path.replace('.{format}','.json');
             var lbase = base;
             if ((base.endsWith('/')) && (component.path.startsWith('/'))) {
@@ -183,9 +191,9 @@ else if (options.format === 'swagger_1') {
             if (component.path.indexOf('://')>=0) {
                 lbase = '';
             }
-	    if (component.path.indexOf('.json')>=0) {
-		extension = '';
-	    }
+        if (component.path.indexOf('.json')>=0) {
+        extension = '';
+        }
 
             var u = (lbase+component.path+extension);
             console.log(u);
@@ -195,7 +203,11 @@ else if (options.format === 'swagger_1') {
                 return res.text();
             })
             .then(data => {
-                //console.log(data);
+        let outfile = path.join('./',component.path+extension);
+        if (options.patchSwagr) {
+            console.log(outfile);
+                    fs.writeFileSync(outfile,data,'utf8');
+        }
                 apiDeclarations.push(yaml.safeLoad(data,{json:true}));
             })
             .catch(err => {
@@ -209,18 +221,22 @@ else if (options.format === 'swagger_1') {
       // resolve multiple promises in parallel
       var res = yield retrieve;
       var sVersion = 'v1_2';
+      if (options.patchSwagr) {
+        api.swaggerVersion = '1.2';
+        delete api.swagrVersion;
+      }
       s1p.specs[sVersion].validate(api,apiDeclarations,function(err,result){
           console.log(JSON.stringify(result,null,2));
       });
       if (options.convert) {
           s1p.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
-	    options.converted = converted;
+            options.converted = converted;
             callback(err, options);
-        });
+          });
       }
       else {
-      	options.api = api;
-      	callback(null, options);
+          options.api = api;
+          callback(null, options);
       }
     });
 

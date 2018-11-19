@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 
-var fs = require('fs');
-var https = require('https');
-var url = require('url');
-var util = require('util');
+'use strict';
 
-var fetch = require('node-fetch');
+const fs = require('fs');
+const https = require('https');
+const url = require('url');
+const util = require('util');
 
-var check_api = require('./index.js');
+const fetch = require('node-fetch');
 
-var red = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[31m';
-var green = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[32m';
-var normal = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[0m';
+const check_api = require('./index.js');
 
-var options = {};
+const red = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[31m';
+const green = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[32m';
+const normal = process.env.NODE_DISABLE_COLORS ? '' : '\x1b[0m';
+
+const options = {};
 options.source = process.argv[2];
 options.convert = process.argv.length>3;
 options.fetchOptions = {};
@@ -54,7 +56,7 @@ if (process.argv.length<3) {
     console.log('Usage: node check_api {url-or-filename} [{convert-filename}]');
     process.exit();
 }
-var u = url.parse(process.argv[2]);
+let u = url.parse(process.argv[2]);
 if (u.protocol && u.protocol.startsWith('http')) {
     if (u.protocol.startsWith('https')) {
         options.fetchOptions.agent = new https.Agent({rejectUnauthorized: false});
