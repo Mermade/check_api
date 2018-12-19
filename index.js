@@ -10,7 +10,7 @@ const co = require('co');
 const yaml = require('js-yaml');
 const bsc = require('swagger-parser');
 const openapi3 = require('oas-validator');
-const asyncApiSchema = require('asyncapi/schema/asyncapi.json');
+const asyncApiSchema = require('asyncapi/schemas/1.2.0.json');
 const ajv = require('ajv')({
     allErrors: true,
     verbose: true,
@@ -78,7 +78,7 @@ else {
     else if (api && api.openapi) {
     console.warn('Unknown openapi version: '+api.openapi);
     }
-    else if (api && api.asyncapi && (typeof api.asyncapi === 'string') && api.asyncapi.startsWith('1.0')) {
+    else if (api && api.asyncapi && (typeof api.asyncapi === 'string') && api.asyncapi.startsWith('1.')) {
         options.format = 'asyncapi_1';
     }
     else if (api && api.asyncapi) {
@@ -114,7 +114,7 @@ else if (options.format === 'asyncapi_1') {
         callback(errors, options);
     }
     else {
-        options.message = 'Valid AsyncAPI 1.0.x';
+        options.message = 'Valid AsyncAPI 1.x';
         callback(null, options);
     }
 }
