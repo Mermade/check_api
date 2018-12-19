@@ -40,6 +40,6 @@
     "raml-1-parser": "^1.1.44",
     "swagger-parser": "^3.4.2",
     "swagger-schema-official": "1.2.0",
-    "swagger-tools": "^0.10.3"
+    "swagger-tools": "^0.10.4"
   }
 }
