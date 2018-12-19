@@ -11,7 +11,7 @@ It returns an exitCode of 0 on success and 1 on failure, making it suitable for 
 * OpenAPI 3.0.x
 * RAML 
 * API Blueprint
-* AsyncAPI 1.0.x
+* AsyncAPI 1.x
 
 ## Planned
 
@@ -22,8 +22,8 @@ It returns an exitCode of 0 on success and 1 on failure, making it suitable for 
 ## API
 
 ```javascript
-var check_api = require('check_api');
-var options = {};
+const check_api = require('check_api');
+const options = {};
 options.source = 'url_or_filename';
 options.convert = false; 
 //options.fetchOptions = {...};
