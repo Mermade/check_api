@@ -1,3 +1,7 @@
+#!/usr/bin/env node
+
+'use strict';
+
 var fs = require('fs');
 var yaml = require('js-yaml');
 

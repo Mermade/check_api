@@ -38,6 +38,7 @@
     "node-fetch": "^1.7.3",
     "oas-validator": "^1.1.9",
     "raml-1-parser": "^1.1.44",
+    "reftools": "^1.0.4",
     "swagger-parser": "^3.4.2",
     "swagger-schema-official": "1.2.0",
     "swagger-tools": "^0.10.4"

@@ -16,6 +16,7 @@ const ajv = require('ajv')({
     verbose: true,
     jsonPointers: true
 });
+const recurse = require('reftools/lib/recurse').recurse;
 
 //require("raml-1-parser/plugins/resourceUriValidationPlugin");
 //require("raml-1-parser/plugins/crudAnnotationsValidator");
@@ -30,7 +31,7 @@ if (typeof api === 'object') {
     options.mode = 'json';
 }
 else if (typeof api === 'string') {
-    api = api.split('\r').join('');
+    api = api.split('\r\n').join('\n').split('\r').join('').split('---').join('###');
 }
 
 if (options.mode == 'text') {
@@ -83,6 +84,18 @@ else {
     }
     else if (api && api.asyncapi) {
     console.warn('Unknown asyncapi version: '+api.asyncapi);
+    }
+    else if (api && api.version) {
+        console.warn('Kin!');
+        options.format = 'asyncapi_1';
+        api.asyncapi = api.version;
+        delete api.version;
+        recurse(api,{},function(obj,key,state){
+            if (key === 'asyncapi_servers_variables') {
+                obj.variables = obj.asyncapi_servers_variables;
+                delete obj.asyncapi_servers_variables;
+            }
+        });
     }
 }
 
