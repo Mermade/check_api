@@ -22,6 +22,8 @@ const ajv = require('ajv')({
 //require("raml-1-parser/plugins/uninheritedTypesDetector");
 //require("raml-1-parser/plugins/xmlAnnotationsValidator");
 
+//https://schema.getpostman.com/
+
 function check_api(api,options,callback) {
 options.mode = 'text';
 options.format = 'none';
@@ -89,20 +91,20 @@ else {
 if (options.format === 'openapi_3') {
     var options = {laxRefs:true,resolve:true,source:options.source,convert:options.convert};
     try {
-        openapi3.validate(api, options, function(err,options) {
-            options.converted = options.openapi||api;
-            if (err) callback(err, options)
-            else {
-            options.message = 'Valid openapi 3.0.x';
-        options.context = [api.info.version + ' ' +
-            (api.servers && api.servers.length ? api.servers[0].url : 'Relative')];
-                callback(null, options);
+        openapi3.validate(api, options, function(err, options) {
+            if (err) {
+                return callback(err, err.options||options);
             }
+            options.converted = options.openapi||api;
+            options.message = 'Valid openapi 3.0.x';
+            options.context = [api.info.version + ' ' +
+            (api.servers && api.servers.length ? api.servers[0].url : 'Relative')];
+            callback(null, options);
         });
     }
     catch (ex) {
-    var context = options.context.pop();
-    options.context = [context];
+        var context = options.context.pop();
+        options.context = [context];
         callback(ex, options);
     }
 }
