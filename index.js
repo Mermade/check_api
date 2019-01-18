@@ -7,7 +7,7 @@ const util = require('util');
 
 const fetch = require('node-fetch');
 const co = require('co');
-const yaml = require('js-yaml');
+const yaml = require('yaml');
 const bsc = require('swagger-parser');
 const openapi3 = require('oas-validator');
 const asyncApiSchema = require('asyncapi/schemas/1.2.0.json');
@@ -48,7 +48,7 @@ if (options.mode == 'text') {
 if (options.mode == 'text') {
     try {
         if (api && api.startsWith('#%RAML')) options.format = 'raml';
-        api = yaml.safeLoad(api);
+        api = yaml.parse(api||'');
         options.mode = 'yaml';
     }
     catch (ex) {
@@ -104,9 +104,9 @@ else {
 if (options.format === 'openapi_3') {
     var options = {laxRefs:true,resolve:true,source:options.source,convert:options.convert};
     try {
-        openapi3.validate(api, options, function(err, options) {
+        openapi3.validate(api, options, function(err, opts) {
             if (err) {
-                return callback(err, err.options||options);
+                return callback(err, err.options||opts||options);
             }
             options.converted = options.openapi||api;
             options.message = 'Valid openapi 3.0.x';
@@ -206,9 +206,9 @@ else if (options.format === 'swagger_1') {
             if (component.path.indexOf('://')>=0) {
                 lbase = '';
             }
-        if (component.path.indexOf('.json')>=0) {
-        extension = '';
-        }
+            if (component.path.indexOf('.json')>=0) {
+                extension = '';
+            }
 
             var u = (lbase+component.path+extension);
             console.log(u);
@@ -223,9 +223,10 @@ else if (options.format === 'swagger_1') {
             console.log(outfile);
                     fs.writeFileSync(outfile,data,'utf8');
         }
-                apiDeclarations.push(yaml.safeLoad(data,{json:true}));
+                apiDeclarations.push(yaml.parse(data));
             })
             .catch(err => {
+                delete err.options;
                 console.error(util.inspect(err));
             }));
         }

@@ -22,7 +22,7 @@ options.fetchOptions = {};
 
 options.fetchOptions.headers = { "Accept-Language": "en-GB,en;q=0.5" };
 
-function result(err,options) {
+function result(err) {
     if (options.convert && options.converted) {
         fs.writeFileSync(process.argv[3],JSON.stringify(options.converted,null,2),'utf8');
     }
