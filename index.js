@@ -8,6 +8,7 @@ const util = require('util');
 const fetch = require('node-fetch');
 const co = require('co');
 const yaml = require('yaml');
+const jsy = require('js-yaml');
 const bsc = require('swagger-parser');
 const openapi3 = require('oas-validator');
 const asyncApiSchema = require('asyncapi/schemas/1.2.0.json');
@@ -48,8 +49,16 @@ if (options.mode == 'text') {
 if (options.mode == 'text') {
     try {
         if (api && api.startsWith('#%RAML')) options.format = 'raml';
-        api = yaml.parse(api||'');
-        options.mode = 'yaml';
+        try {
+            api = yaml.parse(api||'');
+            options.mode = 'yaml';
+        }
+        catch (ex) {
+            console.warn(ex.message);
+            console.warn('Falling back to js-yaml');
+            api = jsy.safeLoad(api||'');
+            options.mode = 'yaml';
+        }
     }
     catch (ex) {
         console.error(ex.message);
