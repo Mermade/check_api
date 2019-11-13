@@ -8,6 +8,7 @@ const util = require('util');
 const fetch = require('node-fetch');
 const co = require('co');
 const yaml = require('yaml');
+yaml.defaultOptions.prettyErrors = true;
 const jsy = require('js-yaml');
 const bsc = require('swagger-parser');
 const openapi3 = require('oas-validator');
@@ -54,7 +55,7 @@ if (options.mode == 'text') {
             options.mode = 'yaml';
         }
         catch (ex) {
-            console.warn(ex.message);
+            console.warn(ex.message,ex.linePos);
             console.warn('Falling back to js-yaml');
             api = jsy.safeLoad(api||'');
             options.mode = 'yaml';
@@ -195,7 +196,7 @@ else if (options.format === 'swagger_1') {
         extension = '.yaml';
     }
     else {
-        base.push(filename);
+        if (options.source.endsWith('/')) base.push(filename);
     }
     base = base.join('/');
 

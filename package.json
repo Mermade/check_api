@@ -41,6 +41,6 @@
     "swagger-parser": "^3.4.2",
     "swagger-schema-official": "1.2.0",
     "swagger-tools": "^0.10.4",
-    "yaml": "^1.2.1"
+    "yaml": "^1.6.0"
   }
 }
