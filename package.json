@@ -29,7 +29,7 @@
     "url": "https://github.com/Mermade/check_api/issues"
   },
   "dependencies": {
-    "ajv": "^4.11.5",
+    "ajv": "^6.12.2",
     "apib2swagger": "^1.0.0",
     "asyncapi": "^2.1.0",
     "co": "^4.6.0",
