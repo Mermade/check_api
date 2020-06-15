@@ -33,7 +33,7 @@
     "apib2swagger": "^1.0.0",
     "asyncapi": "^2.1.0",
     "co": "^4.6.0",
-    "drafter.js": "^2.6.5",
+    "drafter.js": "^3.2.0",
     "node-fetch": "^2.6.0",
     "oas-validator": "^4.0.3",
     "raml-1-parser": "^1.1.44",
