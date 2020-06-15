@@ -35,7 +35,7 @@
     "co": "^4.6.0",
     "drafter.js": "^2.6.5",
     "node-fetch": "^2.6.0",
-    "oas-validator": "^3.3.0",
+    "oas-validator": "^4.0.3",
     "raml-1-parser": "^1.1.44",
     "reftools": "^1.0.5",
     "swagger-parser": "^3.4.2",
