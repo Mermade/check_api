@@ -112,7 +112,7 @@ else {
 }
 
 if (options.format === 'openapi_3') {
-    var options = {laxRefs:true,resolve:true,source:options.source,convert:options.convert};
+    var options = {laxRefs:true,resolve:true,source:options.source,convert:options.convert,verbose:1};
     try {
         openapi3.validate(api, options, function(err, opts) {
             if (err) {
