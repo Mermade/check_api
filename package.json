@@ -38,7 +38,7 @@
     "oas-validator": "^4.0.3",
     "raml-1-parser": "^1.1.44",
     "reftools": "^1.0.5",
-    "swagger-parser": "^9.0.1",
+    "swagger-parser": "^10.0.1",
     "swagger-schema-official": "1.2.0",
     "swagger-tools": "^0.10.4",
     "yaml": "^1.6.0"
