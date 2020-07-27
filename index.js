@@ -10,14 +10,11 @@ const co = require('co');
 const yaml = require('yaml');
 yaml.defaultOptions.prettyErrors = true;
 const jsy = require('js-yaml');
-const bsc = require('swagger-parser');
+const swagger2openapi = require('swagger2openapi');
 const openapi3 = require('oas-validator');
-const asyncApiSchema = require('asyncapi/schemas/1.2.0.json');
-const ajv = require('ajv')({
-    allErrors: true,
-    verbose: true,
-    jsonPointers: true
-});
+const asyncApiSchema1 = require('asyncapi/schemas/1.2.0.json');
+const asyncApiSchema2 = require('asyncapi/schemas/2.0.0.json');
+const ss = require('@exodus/schemasafe').validator;
 const recurse = require('reftools/lib/recurse').recurse;
 
 //require("raml-1-parser/plugins/resourceUriValidationPlugin");
@@ -94,8 +91,11 @@ else {
     else if (api && api.asyncapi && (typeof api.asyncapi === 'string') && api.asyncapi.startsWith('1.')) {
         options.format = 'asyncapi_1';
     }
+    else if (api && api.asyncapi && (typeof api.asyncapi === 'string') && api.asyncapi.startsWith('2.')) {
+        options.format = 'asyncapi_2';
+    }
     else if (api && api.asyncapi) {
-    console.warn('Unknown asyncapi version: '+api.asyncapi);
+        console.warn('Unknown asyncapi version: '+api.asyncapi);
     }
     else if (api && api.version) {
         console.warn('Kin!');
@@ -132,7 +132,7 @@ if (options.format === 'openapi_3') {
     }
 }
 else if (options.format === 'asyncapi_1') {
-    var validate = ajv.compile(asyncApiSchema);
+    const validate = ss(asyncApiSchema1);
     validate(api);
     var errors = validate.errors;
     if (errors) {
@@ -140,6 +140,18 @@ else if (options.format === 'asyncapi_1') {
     }
     else {
         options.message = 'Valid AsyncAPI 1.x';
+        callback(null, options);
+    }
+}
+else if (options.format === 'asyncapi_2') {
+    const validate = ss(asyncApiSchema2);
+    validate(api);
+    var errors = validate.errors;
+    if (errors) {
+        callback(errors, options);
+    }
+    else {
+        options.message = 'Valid AsyncAPI 2.x';
         callback(null, options);
     }
 }
@@ -151,11 +163,11 @@ else if (options.format === 'api_blueprint') {
       }
       else {
           if (options.convert) {
-          var apib2swagger = require('apib2swagger');
-          apib2swagger.convert(api, function (err, res) {
-              options.converted = res.swagger;
-              callback(err, options);
-          });
+              var apib2swagger = require('apib2swagger');
+              apib2swagger.convert(api, function (err, res) {
+                  options.converted = res.swagger;
+                  callback(err, options);
+              });
           }
       else {
           options.message = 'Valid API Blueprint';
@@ -166,16 +178,21 @@ else if (options.format === 'api_blueprint') {
 }
 else if (options.format === 'swagger_2') {
   var orig = api;
-  bsc.validate(options.source,{resolve:{external:true},dereference:{circular:'ignore'}},function(err,api){
+  const options = { resolve: true, patch: true, warnOnly: true };
+  swagger2openapi.convertObj(api,options,function(err,options){
+    api = options.openapi;
+    openapi3.validate(api,options,function(err,options){
     if (api && (!api.info || !api.info.title)) {
         err = {error:'No title'};
     }
-    if (err) {
+    if (err || !options.valid) {
+        if (!options) options = {};
         options.message = 'Invalid swagger 2.0';
     }
     else {
         options.message = 'Valid swagger 2.0';
-    options.context = [api.info.title+' '+api.info.version+
+        if (options.patches) options.message += ' (with '+options.patches+' patches)';
+        options.context = [api.info.title+' '+api.info.version+
         ' host:'+(api.host ? api.host : 'relative')];
         if (api.info["x-logo"] && api.info["x-logo"].url) {
             options.context[0] += '\nHas logo: '+api.info["x-logo"].url;
@@ -184,90 +201,12 @@ else if (options.format === 'swagger_2') {
     options.api = api||orig;
     callback(err, options);
   });
+  });
 }
 else if (options.format === 'swagger_1') {
-    var base = options.source.split('/');
-    var filename = base.pop();
-    var extension = '';
-    if (filename.endsWith('.json')) {
-        extension = '.json';
-    }
-    else if (filename.endsWith('yaml')) {
-        extension = '.yaml';
-    }
-    else {
-        if (options.source.endsWith('/')) base.push(filename);
-    }
-    base = base.join('/');
-
-    //if (options.source.endsWith('.json') || options.source.endsWith('.yaml')) {
-    //    extension = '';
-    //}
-
-    var retrieve = [];
-    var apiDeclarations = [];
-    if (api.apis) {
-        for (let component of api.apis) {
-            component.path = component.path.replace('.{format}','.json');
-            var lbase = base;
-            if ((base.endsWith('/')) && (component.path.startsWith('/'))) {
-                lbase = base.substr(0,base.length-1);
-            }
-            if (component.path.indexOf('://')>=0) {
-                lbase = '';
-            }
-            if (component.path.indexOf('.json')>=0) {
-                extension = '';
-            }
-
-            var u = (lbase+component.path+extension);
-            console.log(u);
-            retrieve.push(fetch(u,options.fetchOptions)
-            .then(res => {
-                console.log(res.status);
-                return res.text();
-            })
-            .then(data => {
-        let outfile = path.join('./',component.path+extension);
-        if (options.patchSwagr) {
-            console.log(outfile);
-                    fs.writeFileSync(outfile,data,'utf8');
-        }
-                apiDeclarations.push(yaml.parse(data));
-            })
-            .catch(err => {
-                delete err.options;
-                console.error(util.inspect(err));
-            }));
-        }
-    }
-
-    var s1p = require('swagger-tools');
-    co(function* () {
-      // resolve multiple promises in parallel
-      var res = yield retrieve;
-      var sVersion = 'v1_2';
-      if (options.patchSwagr) {
-        api.swaggerVersion = '1.2';
-        delete api.swagrVersion;
-      }
-      s1p.specs[sVersion].validate(api,apiDeclarations,function(err,result){
-          console.log(JSON.stringify(result,null,2));
-      });
-      if (options.convert) {
-          s1p.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
-            options.converted = converted;
-            callback(err, options);
-          });
-      }
-      else {
-          options.api = api;
-          callback(null, options);
-      }
-    });
-
-    // https://github.com/apigee-127/swagger-tools/blob/master/docs/API.md#validaterlorso-apideclarations-callback
-
+    const err = {};
+    err.message = 'Swagger 1.x is no longer supported';
+    callback(err,options);
 }
 else if (options.format == 'raml') {
     var raml = require('raml-1-parser');
@@ -282,7 +221,7 @@ else if (options.format == 'raml') {
     //console.log(JSON.stringify(node.toJSON({"rootNodeDetails":true}),null,2));
 }
 else {
-    var err = {};
+    const err = {};
     err.message = 'No format/type detected';
     callback(err,options);
 }
